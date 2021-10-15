@@ -236,7 +236,7 @@
                     } else {
                         alert('O JOGADOR VENCEU!');
                     }
-                    const winners = bets.filter((bet) => bet.player_stop_step === player.currentStep).map((bet) => bet.bettor_name);
+                    const winners = bets.filter((bet) => bet.player_stop_step === player.currentStep + 1).map((bet) => bet.bettor_name);
                     const total = bets.reduce((sum, bet) => sum + parseFloat(bet.bet_amount), 0.0);
 
                     if (winners.length > 0) {
