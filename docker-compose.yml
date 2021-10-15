@@ -1,0 +1,60 @@
+version: '3'
+
+networks:
+  laravel:
+
+volumes:
+  db-volume:
+
+services:
+  site:
+    build:
+      context: .
+      dockerfile: nginx.dockerfile
+      args:
+        - NGINXUSER=${NGINXUSER:-www-data}
+        - NGINXGROUP=${NGINXGROUP:-www-data}
+    container_name: nginx_cb
+    ports:
+      - 80:80
+    volumes:
+      - ./src:/var/www/html/crystalbridge:delegated
+    depends_on:
+      - php
+      - mysql
+    networks:
+      - laravel
+
+  mysql:
+    image: mysql:5.7.29
+    container_name: mysql_cb
+    restart: unless-stopped
+    tty: true
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-crystalbridge_db}
+      MYSQL_USER: ${MYSQL_USER:-homestead}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-secret}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql_cb
+    volumes:
+      - db-volume:/var/lib/mysql
+    networks:
+      - laravel
+
+  php:
+    build:
+      context: .
+      dockerfile: php.dockerfile
+      args:
+        - PHPUSER=${PHPUSER:-www-data}
+        - PHPGROUP=${PHPGROUP:-www-data}
+    container_name: php_cb
+    volumes:
+      - ./src:/var/www/html/crystalbridge:delegated
+    networks:
+      - laravel
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
